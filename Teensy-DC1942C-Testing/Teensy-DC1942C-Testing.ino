@@ -21,20 +21,23 @@ uint8_t wr_config [TOTAL_ICs][6]; //See LTC6804_wrcfg brief
 uint8_t rd_config [TOTAL_ICs][8]; //See LTC6804_rdcfg brief
 
 //Configuration Register Info
-bool wr_refon[TOTAL_ICs]; //wr_ parameters are to be written with the next configuration
-bool rd_refon[TOTAL_ICs]; //rd_ parameters are the state on the LTC6804 as of the last call of LTC6804_rdcfg
+uint8_t wr_gpiox[TOTAL_ICs]; // Bit 7: None Bit 6: None Bit 5: None Bit 4: GPIO5 Bit 3: GPIO4 Bit 2: GPIO3 Bit 1: GPIO2 Bit 0: GPIO1 
+uint8_t rd_gpiox[TOTAL_ICs]; // Some of these might be irrelavent because some of these might change without us sending a new write command
 
-bool wr_swtrd[TOTAL_ICs]; 
-bool rd_swtrd[TOTAL_ICs];
+uint8_t wr_refon[TOTAL_ICs]; //wr_ parameters are to be written with the next configuration
+uint8_t rd_refon[TOTAL_ICs]; //rd_ parameters are the state on the LTC6804 as of the last call of LTC6804_rdcfg
 
-bool wr_adcopt[TOTAL_ICs];
-bool rd_adcopt[TOTAL_ICs];
+uint8_t wr_swtrd[TOTAL_ICs]; 
+uint8_t rd_swtrd[TOTAL_ICs];
 
-bool wr_dcc[TOTAL_ICs][12];
-bool rd_dcc[TOTAL_ICs][12];
+uint8_t wr_adcopt[TOTAL_ICs];
+uint8_t rd_adcopt[TOTAL_ICs];
 
-int wr_dcto[TOTAL_ICs];
-int rd_dcto[TOTAL_ICs];
+uint8_t wr_dcc[TOTAL_ICs][12];
+uint8_t rd_dcc[TOTAL_ICs][12];
+
+uint8_t wr_dcto[TOTAL_ICs];
+uint8_t rd_dcto[TOTAL_ICs];
 
 void setup() {
   // put your setup code here, to run once:
@@ -78,3 +81,9 @@ float VOVConfigRegtoOV (int VOV) {
   return overvoltage;
 }
 
+void CFGGenerator() {
+  for(int i = 0; i< TOTAL_ICs; i++) {
+    uint8_t temp = 0;
+    wr_config[i][1] = (((((wr_gpiox[i]<<1)||wr_refon[i]) <<1)||wr_swtrd[i]) <<1)||wr_adcopt[i]; //CFGR0
+  }
+}
