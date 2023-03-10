@@ -14,6 +14,28 @@
 //Other Definitions
 #define TOTAL_ICs 1 
 
+
+/***BMS Register Information***/
+//Register Arrays
+uint8_t wr_config [TOTAL_ICs][6]; //See LTC6804_wrcfg brief
+uint8_t rd_config [TOTAL_ICs][8]; //See LTC6804_rdcfg brief
+
+//Configuration Register Info
+bool wr_refon[TOTAL_ICs]; //wr_ parameters are to be written with the next configuration
+bool rd_refon[TOTAL_ICs]; //rd_ parameters are the state on the LTC6804 as of the last call of LTC6804_rdcfg
+
+bool wr_swtrd[TOTAL_ICs]; 
+bool rd_swtrd[TOTAL_ICs];
+
+bool wr_adcopt[TOTAL_ICs];
+bool rd_adcopt[TOTAL_ICs];
+
+bool wr_dcc[TOTAL_ICs][12];
+bool rd_dcc[TOTAL_ICs][12];
+
+int wr_dcto[TOTAL_ICs];
+int rd_dcto[TOTAL_ICs];
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600)
