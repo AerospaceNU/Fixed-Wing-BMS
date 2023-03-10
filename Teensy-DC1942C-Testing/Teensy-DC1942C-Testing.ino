@@ -25,3 +25,34 @@ void loop() {
   // put your main code here, to run repeatedly:
 
 }
+
+int UVtoVUVConfigReg (float undervoltage) {
+  // Converts the desired undervoltage level to the integer used to send to the config register, however,
+  // the data cannot be sent directly to the configuration register because the config register stores VUV in 12bits
+  // while an int is 16bits
+  int VUV = int(undervoltage/(16*0.0001))-1;
+  return VUV;
+
+}
+
+float VUVConfigRegtoUV (int VUV) {
+
+  float undervoltage = (float(VUV)+1)/(16*0.0001);
+  return undervoltage;
+}
+
+int OVtoVOVConfigReg (float overvoltage) {
+  // Converts the desired overvoltage level to the integer used to send to the config register, however,
+  // the data cannot be sent directly to the configuration register because the config register stores VOV in 12bits
+  // while an int is 16bits
+  int VOV = int(overvoltage/(16*0.0001))-1;
+  return VOV;
+
+}
+
+float VOVConfigRegtoOV (int VOV) {
+
+  float overvoltage = (float(VOV)+1)/(16*0.0001);
+  return overvoltage;
+}
+
