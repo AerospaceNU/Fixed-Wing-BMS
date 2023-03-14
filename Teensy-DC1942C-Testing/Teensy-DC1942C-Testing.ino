@@ -13,9 +13,9 @@
 
 //Other Definitions
 #define TOTAL_ICs 1 
+#define BYTE_MASK B0000000011111111
 
-
-/***BMS Register Information***/
+/***BMS Information***/
 //Register Arrays
 uint8_t wr_config [TOTAL_ICs][6]; //See LTC6804_wrcfg brief
 uint8_t rd_config [TOTAL_ICs][8]; //See LTC6804_rdcfg brief
@@ -32,6 +32,12 @@ uint8_t rd_swtrd[TOTAL_ICs];
 
 uint8_t wr_adcopt[TOTAL_ICs];
 uint8_t rd_adcopt[TOTAL_ICs];
+
+uint16_t wr_vuv[TOTAL_ICs];
+uint16_t rd_vuv[TOTAL_ICs];
+
+uint16_t wr_vov[TOTAL_ICs];
+uint16_t rd_vov[TOTAL_ICs];
 
 uint8_t wr_dcc[TOTAL_ICs][12];
 uint8_t rd_dcc[TOTAL_ICs][12];
@@ -77,13 +83,23 @@ int OVtoVOVConfigReg (float overvoltage) {
 
 float VOVConfigRegtoOV (int VOV) {
 
-  float overvoltage = (float(VOV)+1)/(16*0.0001);
+  float overvoltage = (float(VOV))/(16*0.0001);
   return overvoltage;
 }
 
 void CFGGenerator() {
+  // Generates configuration register array for sending to LTC6804
   for(int i = 0; i< TOTAL_ICs; i++) {
-    uint8_t temp = 0;
-    wr_config[i][1] = (((((wr_gpiox[i]<<1)||wr_refon[i]) <<1)||wr_swtrd[i]) <<1)||wr_adcopt[i]; //CFGR0
+    wr_config[i][0] = (((((wr_gpiox[i]<<1)|wr_refon[i]) <<1)|wr_swtrd[i]) <<1)|wr_adcopt[i]; //CFGR0
+    wr_config[i][1] = uint8_t(wr_vuv); //Just taking the first 8 bits //CFGR1
+    wr_config[i][2] = (uint8_t(wr_vov&B1111)<<4)|(uint8_t(wr_vuv>>8); //CFGR2
+    wr_config[i][3] = uint8_t(wr_vov>>8); //CFGR3
+    uint16_t dcc_block;
+    for (int j = 0; j<12; j++) {
+      dcc_block = (dcc_block<<1)|wr_dcc[i][j];
+    };
+
+    wr_config[i][4] = uint8_t(dcc_block); //CFGR4
+    wr_config[i][5] = (wr_dcto<<4)|uint8_t(wr_dcc>>8); //CFGR5
   }
 }
