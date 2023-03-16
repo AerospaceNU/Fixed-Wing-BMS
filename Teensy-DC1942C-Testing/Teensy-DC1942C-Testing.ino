@@ -57,31 +57,31 @@ void loop() {
 
 }
 
-int UVtoVUVConfigReg (float undervoltage) {
+uint16_t UVtoVUVConfigReg (float undervoltage) {
   // Converts the desired undervoltage level to the integer used to send to the config register, however,
   // the data cannot be sent directly to the configuration register because the config register stores VUV in 12bits
-  // while an int is 16bits
-  int VUV = int(undervoltage/(16*0.0001))-1;
+  // while an uint16_t is 16bits
+  uint16_t VUV = int(undervoltage/(16*0.0001))-1;
   return VUV;
 
 }
 
-float VUVConfigRegtoUV (int VUV) {
+float VUVConfigRegtoUV (uint16_t VUV) {
 
   float undervoltage = (float(VUV)+1)/(16*0.0001);
   return undervoltage;
 }
 
-int OVtoVOVConfigReg (float overvoltage) {
+uint16_t OVtoVOVConfigReg (float overvoltage) {
   // Converts the desired overvoltage level to the integer used to send to the config register, however,
   // the data cannot be sent directly to the configuration register because the config register stores VOV in 12bits
-  // while an int is 16bits
-  int VOV = int(overvoltage/(16*0.0001))-1;
+  // while an uint16_t is 16bits
+  uint16_t VOV = int(overvoltage/(16*0.0001));
   return VOV;
 
 }
 
-float VOVConfigRegtoOV (int VOV) {
+float VOVConfigRegtoOV (uint16_t VOV) {
 
   float overvoltage = (float(VOV))/(16*0.0001);
   return overvoltage;
@@ -89,13 +89,13 @@ float VOVConfigRegtoOV (int VOV) {
 
 void CFGGenerator() {
   // Generates configuration register array for sending to LTC6804
-  for(int i = 0; i< TOTAL_ICs; i++) {
+  for(uint16_t i = 0; i< TOTAL_ICs; i++) {
     wr_config[i][0] = (((((wr_gpiox[i]<<1)|wr_refon[i]) <<1)|wr_swtrd[i]) <<1)|wr_adcopt[i]; //CFGR0
     wr_config[i][1] = uint8_t(wr_vuv); //Just taking the first 8 bits //CFGR1
     wr_config[i][2] = (uint8_t(wr_vov&B1111)<<4)|(uint8_t(wr_vuv>>8); //CFGR2
     wr_config[i][3] = uint8_t(wr_vov>>8); //CFGR3
     uint16_t dcc_block;
-    for (int j = 0; j<12; j++) {
+    for (uint16_t j = 0; j<12; j++) {
       dcc_block = (dcc_block<<1)|wr_dcc[i][j];
     };
 
