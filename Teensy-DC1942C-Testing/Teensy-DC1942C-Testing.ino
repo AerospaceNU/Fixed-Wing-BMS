@@ -19,6 +19,7 @@
 //Register Arrays
 uint8_t wr_config [TOTAL_ICs][6]; //See LTC6804_wrcfg brief
 uint8_t rd_config [TOTAL_ICs][8]; //See LTC6804_rdcfg brief
+uint16_t rd_cell_codes [TOTAL_ICs][12]; //See LTC6804_rdcv brief
 
 //Configuration Register Info
 uint8_t wr_gpiox[TOTAL_ICs]; // Bit 7: None Bit 6: None Bit 5: None Bit 4: GPIO5 Bit 3: GPIO4 Bit 2: GPIO3 Bit 1: GPIO2 Bit 0: GPIO1 
@@ -44,6 +45,9 @@ uint8_t rd_dcc[TOTAL_ICs][12];
 
 uint8_t wr_dcto[TOTAL_ICs];
 uint8_t rd_dcto[TOTAL_ICs];
+
+//Cell Voltages
+float cell_voltages[TOTAL_ICs][12];
 
 void setup() {
   // put your setup code here, to run once:
@@ -101,5 +105,23 @@ void CFGGenerator() {
 
     wr_config[i][4] = uint8_t(dcc_block); //CFGR4
     wr_config[i][5] = (wr_dcto<<4)|uint8_t(wr_dcc>>8); //CFGR5
+  }
+}
+
+void ReadCellVoltages(uint8_t reg = 0) {
+  wakeup_idle();
+  LTC6804_adcv();
+  delay(10);
+  wakeup_idle();
+  error = LTC6804_rdcv(reg, TOTAL_ICs, rd_cell_codes);
+
+  if (error == -1) {
+    Serial.println("PEC error was detected in cell voltage data.");
+  }
+  
+  for (int j = 0; j < TOTAL_ICs;j++) {
+    for (int i = 0; i < sizeof(rd_cell_codes); i++) {
+      cell_voltages[j][i] = rd_cell_codes[j][i] * 0.0001;
+    }
   }
 }
