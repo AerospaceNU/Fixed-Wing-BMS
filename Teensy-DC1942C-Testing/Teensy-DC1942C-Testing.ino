@@ -49,6 +49,10 @@ uint8_t rd_dcto[TOTAL_ICs];
 //Cell Voltages
 float cell_voltages[TOTAL_ICs][12];
 
+// Auxilary Register Info
+float aux_voltages[TOTAL_ICs][5];
+float vref2[TOTAL_ICs];
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600)
@@ -61,6 +65,9 @@ void loop() {
 
 }
 
+/******** LTC6804 Communication Functions ********/
+
+/**** Configuration Register Functions****/
 uint16_t UVtoVUVConfigReg (float undervoltage) {
   // Converts the desired undervoltage level to the integer used to send to the config register, however,
   // the data cannot be sent directly to the configuration register because the config register stores VUV in 12bits
@@ -108,12 +115,15 @@ void CFGGenerator() {
   }
 }
 
-void ReadCellVoltages(uint8_t reg = 0) {
+
+/**** Cell Voltage Registers Functions ****/
+void ReadCellVoltages(uint8_t reg = 0) { // See LTC6804_rdcv for info about reg
   wakeup_idle();
   LTC6804_adcv();
   delay(10);
   wakeup_idle();
-  error = LTC6804_rdcv(reg, TOTAL_ICs, rd_cell_codes);
+  
+  int8_t error = LTC6804_rdcv(reg, TOTAL_ICs, rd_cell_codes);
 
   if (error == -1) {
     Serial.println("PEC error was detected in cell voltage data.");
@@ -125,3 +135,25 @@ void ReadCellVoltages(uint8_t reg = 0) {
     }
   }
 }
+
+
+/**** Auxilary Registers Functions ****/
+void ReadAuxilaryVoltages(uint8_t reg = 0) { // See LTC6804_rdaux brief for info about reg
+  wakeup_idle();
+  LTC6804_adax();
+  delay(10);
+  wakeup_idle();
+  uint16_t aux_codes[TOTAL_ICs][6];
+  int8_t error = LTC6804_rdaux(reg, TOTAL_ICs, aux_codes);
+
+  if (error == -1) {
+    Serial.println("PEC error was detected in aux voltage data");
+  }
+
+  for (int i = 0; i<TOTAL_ICs;i++) {
+    for (int j = 0; j < 6; j++) {
+      aux_voltages[i][j] = aux_codes[i][j] * 0.0001;
+    }
+  }
+}
+
